@@ -1,13 +1,24 @@
+
 package com.example.rentaride;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@SpringBootApplication
+@SpringBootApplication(
+        scanBasePackages = {
+                "com.example.rentaride.controller",
+                "com.example.rentaride.service",
+                "com.example.rentaride.repository"
+        }
+)
+@EntityScan(basePackages = {"com.example.rentaride.domain"})
+@EnableJpaRepositories(basePackages = {"com.example.rentaride.repository"})
 public class RentarideApplication {
 
 	public static void main(String[] args) {

@@ -23,7 +23,12 @@ public class MasterDataController {
     public ResponseEntity<?> getVehicleModels() {
         List<MasterData> locations = repository.findByType("location");
         List<MasterData> cars = repository.findByType("car");
-        return ResponseEntity.ok(new Object[]{cars, locations});
+        // Flatten into a single array as the frontend expects a single list
+        List<MasterData> combined = new java.util.ArrayList<>();
+        combined.addAll(cars);
+        combined.addAll(locations);
+        return ResponseEntity.ok(combined);
     }
 }
+
 

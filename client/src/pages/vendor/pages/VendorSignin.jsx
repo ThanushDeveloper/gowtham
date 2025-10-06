@@ -36,7 +36,7 @@ function VendorSignin() {
     e.preventDefault();
     try {
       dispatch(signInStart());
-      const res = await fetch("api/vendor/vendorsignin", {
+      const res = await fetch("/api/vendor/vendorsignin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -48,8 +48,8 @@ function VendorSignin() {
         return;
       }
       if (data.isVendor) {
+        dispatch(signInSuccess({ ...data, isVendor: true }));
         navigate("/vendorDashboard");
-        dispatch(signInSuccess(data));
       }
     } catch (error) {
       dispatch(signInFailure(error));

@@ -10,7 +10,8 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: mode === "development" ? {
         "/api": {
-          target: env.VITE_PRODUCTION_BACKEND_URL,
+          // Use provided backend URL, else default to local Spring Boot
+          target: env.VITE_PRODUCTION_BACKEND_URL || 'http://localhost:8080',
           changeOrigin: true,
           secure: false,
           // rewrite: (path) => path.replace(/^\/api/, '')

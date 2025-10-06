@@ -36,14 +36,15 @@ function VendorSignin() {
     e.preventDefault();
     try {
       dispatch(signInStart());
-      const res = await fetch("api/vendor/vendorsignin", {
+      const res = await fetch("/api/vendor/vendorsignin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(formData),
       });
       const data = await res.json();
 
-      if (data.succes === false) {
+      if (!res.ok || data.succes === false) {
         dispatch(signInFailure(data));
         return;
       }
@@ -80,7 +81,7 @@ function VendorSignin() {
         >
           <div>
             <input
-              type="text"
+              type="email"
               id="email"
               className="text-black bg-slate-100 p-3 rounded-md w-full"
               placeholder="Email"
@@ -93,7 +94,7 @@ function VendorSignin() {
 
           <div>
             <input
-              type="text"
+              type="password"
               id="password"
               className="text-black bg-slate-100 p-3 rounded-md w-full"
               placeholder="Password"

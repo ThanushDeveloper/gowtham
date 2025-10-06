@@ -108,24 +108,7 @@ public class AdminController {
         try { return s == null ? null : Integer.valueOf(s); } catch (Exception e) { return null; }
     }
 
-    @GetMapping("/getVehicleModels")
-    public ResponseEntity<?> getVehicleModels() {
-        // Minimal LOV response combining locations and car models from vehicles
-        List<Vehicle> all = vehicleRepository.findAll();
-        List<Map<String, Object>> out = new ArrayList<>();
-        Set<String> locKey = new HashSet<>();
-        Set<String> carKey = new HashSet<>();
-        for (Vehicle v : all) {
-            String keyLoc = v.getDistrict() + "|" + v.getLocation();
-            if (v.getDistrict() != null && v.getLocation() != null && locKey.add(keyLoc)) {
-                out.add(Map.of("type", "location", "district", v.getDistrict(), "location", v.getLocation()));
-            }
-            if (v.getModel() != null && carKey.add(v.getModel())) {
-                out.add(Map.of("type", "car", "model", v.getModel(), "brand", v.getCompany()));
-            }
-        }
-        return ResponseEntity.ok(out);
-    }
+    // Removed duplicate endpoint "/getVehicleModels" to avoid ambiguous mapping with MasterDataController
 
     @GetMapping("/allBookings")
     public ResponseEntity<?> allBookings() {

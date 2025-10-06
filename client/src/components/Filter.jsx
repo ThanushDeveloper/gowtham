@@ -40,7 +40,7 @@ const Filter = () => {
       dispatch(setFilteredData(userAllVehicles));
     } else if (transformedData && transformedData.length > 0) {
       try {
-        const res = await fetch("api/user/filterVehicles", {
+        const res = await fetch("/api/user/filterVehicles", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -63,7 +63,7 @@ function SignIn() {
   const dispatch = useDispatch();
 
   const onSubmit = async (formData, e) => {
-    const BASE_URL = import.meta.env.VITE_PRODUCTION_BACKEND_URL;
+    const BASE_URL = import.meta.env.VITE_PRODUCTION_BACKEND_URL || '';
     e.preventDefault();
     try {
       dispatch(signInStart());

@@ -112,7 +112,7 @@ const CarSearch = () => {
           pickUpLocation: data.pickup_location,
         };
 
-        const res = await fetch("api/user/showSingleofSameModel", {
+        const res = await fetch("/api/user/showSingleofSameModel", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

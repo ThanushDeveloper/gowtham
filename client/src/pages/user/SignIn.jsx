@@ -63,17 +63,17 @@ function SignIn() {
   const dispatch = useDispatch();
 
   const onSubmit = async (formData, e) => {
-    const BASE_URL = import.meta.env.VITE_PRODUCTION_BACKEND_URL;
     e.preventDefault();
     try {
       dispatch(signInStart());
-      const res = await fetch(`${BASE_URL}/api/auth/signin`, {
+      const res = await fetch(`/api/auth/signin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(formData),
       });
       const data = await res.json();
-      
+
       if (data?.accessToken) {
         localStorage.removeItem(("accessToken"))
         localStorage.setItem("accessToken", data.accessToken);
@@ -83,26 +83,27 @@ function SignIn() {
         localStorage.setItem("refreshToken", data.refreshToken)
       }
 
-      if (data.succes === false || !res.ok) {
+      if (!res.ok || data?.succes === false) {
         dispatch(loadingEnd());
         dispatch(signInFailure(data));
-
         return;
       }
+
       if (data.isAdmin) {
         dispatch(signInSuccess(data));
         dispatch(loadingEnd());
         navigate("/adminDashboard");
+        return;
       } else if (data.isUser) {
         dispatch(signInSuccess(data));
         dispatch(loadingEnd());
         navigate("/");
+        return;
       } else {
         dispatch(loadingEnd());
         dispatch(signInFailure(data));
+        return;
       }
-      dispatch(loadingEnd());
-      dispatch(signInFailure("something went wrong"));
     } catch (error) {
       dispatch(loadingEnd());
       dispatch(signInFailure(error));
@@ -131,7 +132,7 @@ function SignIn() {
         >
           <div>
             <input
-              type="text"
+              type="email"
               id="email"
               className="text-black bg-slate-100 p-3 rounded-md w-full"
               placeholder="Email"
@@ -144,7 +145,7 @@ function SignIn() {
 
           <div>
             <input
-              type="text"
+              type="password"
               id="password"
               className="text-black bg-slate-100 p-3 rounded-md w-full"
               placeholder="Password"

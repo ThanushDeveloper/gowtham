@@ -36,11 +36,12 @@ function SignUp() {
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(formData),
       });
       const data = await res.json();
       setLoading(false);
-      if (data.succes === false) {
+      if (!res.ok || data?.succes === false) {
         setError(true);
         return;
       }
@@ -90,7 +91,7 @@ function SignUp() {
 
           <div>
             <input
-              type="text"
+              type="email"
               id="email"
               className="text-black bg-slate-100 p-3 rounded-md w-full"
               placeholder="Email"
@@ -106,7 +107,7 @@ function SignUp() {
 
           <div>
             <input
-              type="text"
+              type="password"
               id="password"
               className="text-black bg-slate-100 p-3 rounded-md w-full"
               placeholder="Password"

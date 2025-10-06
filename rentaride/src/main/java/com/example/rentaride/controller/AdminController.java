@@ -31,41 +31,43 @@ public class AdminController {
 
     @DeleteMapping("/deleteVehicle/{id}")
     public ResponseEntity<?> deleteVehicle(@PathVariable("id") Long id) {
-        return vehicleRepository.findById(id).map(v -> {
-            v.setIsDeleted("true");
-            vehicleRepository.save(v);
-            return ResponseEntity.ok(Map.of("message", "deleted"));
-        }).orElseGet(() -> ResponseEntity.status(404).body(Map.of("succes", false)));
+        Optional<Vehicle> opt = vehicleRepository.findById(id);
+        if (opt.isEmpty()) return ResponseEntity.status(404).body(Map.of("succes", false));
+        Vehicle v = opt.get();
+        v.setIsDeleted("true");
+        vehicleRepository.save(v);
+        return ResponseEntity.ok(Map.of("message", "deleted"));
     }
 
     @PutMapping("/editVehicle/{id}")
     public ResponseEntity<?> editVehicle(@PathVariable("id") Long id, @RequestBody Map<String, Object> body) {
-        return vehicleRepository.findById(id).map(v -> {
-            Map<String, Object> form = (Map<String, Object>) body.getOrDefault("formData", Collections.emptyMap());
-            if (form.containsKey("registeration_number")) v.setRegistrationNumber(Objects.toString(form.get("registeration_number"), v.getRegistrationNumber()));
-            if (form.containsKey("company")) v.setCompany(Objects.toString(form.get("company"), v.getCompany()));
-            if (form.containsKey("name")) v.setName(Objects.toString(form.get("name"), v.getName()));
-            if (form.containsKey("model")) v.setModel(Objects.toString(form.get("model"), v.getModel()));
-            if (form.containsKey("title")) v.setCarTitle(Objects.toString(form.get("title"), v.getCarTitle()));
-            if (form.containsKey("description")) v.setCarDescription(Objects.toString(form.get("description"), v.getCarDescription()));
-            if (form.containsKey("base_package")) v.setBasePackage(Objects.toString(form.get("base_package"), v.getBasePackage()));
-            if (form.containsKey("price")) v.setPrice(Integer.valueOf(Objects.toString(form.get("price"))));
-            if (form.containsKey("year_made")) v.setYearMade(Integer.valueOf(Objects.toString(form.get("year_made"))));
-            if (form.containsKey("fuelType")) v.setFuelType(Objects.toString(form.get("fuelType"), v.getFuelType()));
-            if (form.containsKey("Seats")) v.setSeats(Integer.valueOf(Objects.toString(form.get("Seats"))));
-            if (form.containsKey("transmitionType")) v.setTransmission(Objects.toString(form.get("transmitionType"), v.getTransmission()));
-            if (form.containsKey("insurance_end_date")) v.setInsuranceEnd(Instant.parse(Objects.toString(form.get("insurance_end_date"))));
-            if (form.containsKey("Registeration_end_date")) v.setRegistrationEnd(Instant.parse(Objects.toString(form.get("Registeration_end_date"))));
-            if (form.containsKey("polution_end_date")) v.setPollutionEnd(Instant.parse(Objects.toString(form.get("polution_end_date"))));
-            if (form.containsKey("carType")) v.setCarType(Objects.toString(form.get("carType"), v.getCarType()));
-            if (form.containsKey("vehicleLocation")) v.setLocation(Objects.toString(form.get("vehicleLocation"), v.getLocation()));
-            if (form.containsKey("vehicleDistrict")) v.setDistrict(Objects.toString(form.get("vehicleDistrict"), v.getDistrict()));
-            v.setUpdatedAt(Instant.now());
-            v.setIsAdminApproved(false);
-            v.setIsRejected(false);
-            vehicleRepository.save(v);
-            return ResponseEntity.ok(v);
-        }).orElseGet(() -> ResponseEntity.status(404).body(Map.of("succes", false)));
+        Optional<Vehicle> opt = vehicleRepository.findById(id);
+        if (opt.isEmpty()) return ResponseEntity.status(404).body(Map.of("succes", false));
+        Vehicle v = opt.get();
+        Map<String, Object> form = (Map<String, Object>) body.getOrDefault("formData", Collections.emptyMap());
+        if (form.containsKey("registeration_number")) v.setRegistrationNumber(Objects.toString(form.get("registeration_number"), v.getRegistrationNumber()));
+        if (form.containsKey("company")) v.setCompany(Objects.toString(form.get("company"), v.getCompany()));
+        if (form.containsKey("name")) v.setName(Objects.toString(form.get("name"), v.getName()));
+        if (form.containsKey("model")) v.setModel(Objects.toString(form.get("model"), v.getModel()));
+        if (form.containsKey("title")) v.setCarTitle(Objects.toString(form.get("title"), v.getCarTitle()));
+        if (form.containsKey("description")) v.setCarDescription(Objects.toString(form.get("description"), v.getCarDescription()));
+        if (form.containsKey("base_package")) v.setBasePackage(Objects.toString(form.get("base_package"), v.getBasePackage()));
+        if (form.containsKey("price")) v.setPrice(Integer.valueOf(Objects.toString(form.get("price"))));
+        if (form.containsKey("year_made")) v.setYearMade(Integer.valueOf(Objects.toString(form.get("year_made"))));
+        if (form.containsKey("fuelType")) v.setFuelType(Objects.toString(form.get("fuelType"), v.getFuelType()));
+        if (form.containsKey("Seats")) v.setSeats(Integer.valueOf(Objects.toString(form.get("Seats"))));
+        if (form.containsKey("transmitionType")) v.setTransmission(Objects.toString(form.get("transmitionType"), v.getTransmission()));
+        if (form.containsKey("insurance_end_date")) v.setInsuranceEnd(Instant.parse(Objects.toString(form.get("insurance_end_date"))));
+        if (form.containsKey("Registeration_end_date")) v.setRegistrationEnd(Instant.parse(Objects.toString(form.get("Registeration_end_date"))));
+        if (form.containsKey("polution_end_date")) v.setPollutionEnd(Instant.parse(Objects.toString(form.get("polution_end_date"))));
+        if (form.containsKey("carType")) v.setCarType(Objects.toString(form.get("carType"), v.getCarType()));
+        if (form.containsKey("vehicleLocation")) v.setLocation(Objects.toString(form.get("vehicleLocation"), v.getLocation()));
+        if (form.containsKey("vehicleDistrict")) v.setDistrict(Objects.toString(form.get("vehicleDistrict"), v.getDistrict()));
+        v.setUpdatedAt(Instant.now());
+        v.setIsAdminApproved(false);
+        v.setIsRejected(false);
+        vehicleRepository.save(v);
+        return ResponseEntity.ok(v);
     }
 
     @PostMapping("/addProduct")
@@ -159,4 +161,5 @@ public class AdminController {
         return ResponseEntity.ok(Map.of("ok", true));
     }
 }
+
 

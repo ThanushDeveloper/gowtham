@@ -3,6 +3,7 @@ package com.example.rentaride.service;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +25,7 @@ public class TokenService {
                 .setSubject(String.valueOf(userId))
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(now.plusSeconds(expiresInSeconds)))
-                .signWith(SignatureAlgorithm.HS256, accessSecret)
+                .signWith(Keys.hmacShaKeyFor(accessSecret.getBytes()), SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -34,8 +35,9 @@ public class TokenService {
                 .setSubject(String.valueOf(userId))
                 .setIssuedAt(Date.from(now))
                 .setExpiration(Date.from(now.plusSeconds(expiresInSeconds)))
-                .signWith(SignatureAlgorithm.HS256, refreshSecret)
+                .signWith(Keys.hmacShaKeyFor(refreshSecret.getBytes()), SignatureAlgorithm.HS256)
                 .compact();
     }
 }
+
 

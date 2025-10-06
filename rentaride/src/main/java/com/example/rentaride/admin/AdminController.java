@@ -92,36 +92,38 @@ public class AdminController {
 
     @DeleteMapping("/deleteVehicle/{id}")
     public ResponseEntity<?> deleteVehicle(@PathVariable Long id) {
-        return vehicleRepository.findById(id).map(v -> {
-            v.setIsDeleted("true");
-            vehicleRepository.save(v);
-            return ResponseEntity.ok(Map.of("ok", true));
-        }).orElse(ResponseEntity.status(404).body(err("vehicle not found")));
+        Optional<Vehicle> opt = vehicleRepository.findById(id);
+        if (opt.isEmpty()) return ResponseEntity.status(404).body(err("vehicle not found"));
+        Vehicle v = opt.get();
+        v.setIsDeleted("true");
+        vehicleRepository.save(v);
+        return ResponseEntity.ok(Map.of("ok", true));
     }
 
     @PutMapping("/editVehicle/{id}")
     public ResponseEntity<?> editVehicle(@PathVariable Long id, @RequestBody Map<String, Object> body) {
-        return vehicleRepository.findById(id).map(v -> {
-            Map<String, Object> fd = (Map<String, Object>) body.get("formData");
-            if (fd == null) return ResponseEntity.badRequest().body(err("invalid body"));
-            putIf(fd, "registeration_number", s -> v.setRegisterationNumber(s));
-            putIf(fd, "company", v::setCompany);
-            putIf(fd, "name", v::setName);
-            putIf(fd, "model", v::setModel);
-            putIf(fd, "title", v::setTitle);
-            putIf(fd, "base_package", s -> v.setBasePackage(s));
-            putIf(fd, "price", o -> v.setPrice(Integer.valueOf(o)));
-            putIf(fd, "year_made", o -> v.setYearMade(Integer.valueOf(o)));
-            putIf(fd, "fuelType", v::setFuelType);
-            putIf(fd, "Seats", o -> v.setSeats(Integer.valueOf(o)));
-            putIf(fd, "transmitionType", v::setTransmition);
-            putIf(fd, "vehicleLocation", v::setLocation);
-            putIf(fd, "vehicleDistrict", v::setDistrict);
-            putIf(fd, "carType", v::setCarType);
-            putIf(fd, "description", v::setDescription);
-            vehicleRepository.save(v);
-            return ResponseEntity.ok(Map.of("ok", true));
-        }).orElse(ResponseEntity.status(404).body(err("vehicle not found")));
+        Optional<Vehicle> opt = vehicleRepository.findById(id);
+        if (opt.isEmpty()) return ResponseEntity.status(404).body(err("vehicle not found"));
+        Vehicle v = opt.get();
+        Map<String, Object> fd = (Map<String, Object>) body.get("formData");
+        if (fd == null) return ResponseEntity.badRequest().body(err("invalid body"));
+        setIfPresentStr(fd, "registeration_number", v::setRegisterationNumber);
+        setIfPresentStr(fd, "company", v::setCompany);
+        setIfPresentStr(fd, "name", v::setName);
+        setIfPresentStr(fd, "model", v::setModel);
+        setIfPresentStr(fd, "title", v::setTitle);
+        setIfPresentStr(fd, "base_package", v::setBasePackage);
+        setIfPresentInt(fd, "price", v::setPrice);
+        setIfPresentInt(fd, "year_made", v::setYearMade);
+        setIfPresentStr(fd, "fuelType", v::setFuelType);
+        setIfPresentInt(fd, "Seats", v::setSeats);
+        setIfPresentStr(fd, "transmitionType", v::setTransmition);
+        setIfPresentStr(fd, "vehicleLocation", v::setLocation);
+        setIfPresentStr(fd, "vehicleDistrict", v::setDistrict);
+        setIfPresentStr(fd, "carType", v::setCarType);
+        setIfPresentStr(fd, "description", v::setDescription);
+        vehicleRepository.save(v);
+        return ResponseEntity.ok(Map.of("ok", true));
     }
 
     @GetMapping("/getVehicleModels")
@@ -140,23 +142,25 @@ public class AdminController {
     @PostMapping("/approveVendorVehicleRequest")
     public ResponseEntity<?> approveVendorVehicleRequest(@RequestBody Map<String, Object> body) {
         Long id = toLong(body.get("_id"));
-        return vehicleRepository.findById(id).map(v -> {
-            v.setIsAdminApproved(true);
-            v.setIsRejected(false);
-            vehicleRepository.save(v);
-            return ResponseEntity.ok(Map.of("ok", true));
-        }).orElse(ResponseEntity.status(404).body(err("vehicle not found")));
+        Optional<Vehicle> opt = vehicleRepository.findById(id);
+        if (opt.isEmpty()) return ResponseEntity.status(404).body(err("vehicle not found"));
+        Vehicle v = opt.get();
+        v.setIsAdminApproved(true);
+        v.setIsRejected(false);
+        vehicleRepository.save(v);
+        return ResponseEntity.ok(Map.of("ok", true));
     }
 
     @PostMapping("/rejectVendorVehicleRequest")
     public ResponseEntity<?> rejectVendorVehicleRequest(@RequestBody Map<String, Object> body) {
         Long id = toLong(body.get("_id"));
-        return vehicleRepository.findById(id).map(v -> {
-            v.setIsRejected(true);
-            v.setIsAdminApproved(false);
-            vehicleRepository.save(v);
-            return ResponseEntity.ok(Map.of("ok", true));
-        }).orElse(ResponseEntity.status(404).body(err("vehicle not found")));
+        Optional<Vehicle> opt = vehicleRepository.findById(id);
+        if (opt.isEmpty()) return ResponseEntity.status(404).body(err("vehicle not found"));
+        Vehicle v = opt.get();
+        v.setIsRejected(true);
+        v.setIsAdminApproved(false);
+        vehicleRepository.save(v);
+        return ResponseEntity.ok(Map.of("ok", true));
     }
 
     @GetMapping("/allBookings")
@@ -168,13 +172,14 @@ public class AdminController {
     public ResponseEntity<?> changeStatus(@RequestBody Map<String, Object> body) {
         Long id = toLong(body.get("id"));
         String status = Objects.toString(body.get("status"), "booked");
-        return bookingRepository.findById(id).map(b -> {
-            try {
-                b.setStatus(Booking.Status.valueOf(status));
-            } catch (Exception ignored) {}
-            bookingRepository.save(b);
-            return ResponseEntity.ok(Map.of("ok", true));
-        }).orElse(ResponseEntity.status(404).body(err("booking not found")));
+        Optional<Booking> opt = bookingRepository.findById(id);
+        if (opt.isEmpty()) return ResponseEntity.status(404).body(err("booking not found"));
+        Booking b = opt.get();
+        try {
+            b.setStatus(Booking.Status.valueOf(status));
+        } catch (Exception ignored) {}
+        bookingRepository.save(b);
+        return ResponseEntity.ok(Map.of("ok", true));
     }
 
     @GetMapping("/signout")
@@ -213,11 +218,11 @@ public class AdminController {
         return m;
     }
 
-    private void putIf(Map<String, Object> fd, String key, java.util.function.Consumer<String> setter) {
+    private void setIfPresentStr(Map<String, Object> fd, String key, java.util.function.Consumer<String> setter) {
         if (fd.containsKey(key) && fd.get(key) != null) setter.accept(fd.get(key).toString());
     }
 
-    private void putIf(Map<String, Object> fd, String key, java.util.function.Consumer<Integer> setterInt) {
+    private void setIfPresentInt(Map<String, Object> fd, String key, java.util.function.Consumer<Integer> setterInt) {
         if (fd.containsKey(key) && fd.get(key) != null) setterInt.accept(Integer.valueOf(fd.get(key).toString()));
     }
 
@@ -225,4 +230,5 @@ public class AdminController {
         try { return Long.valueOf(String.valueOf(o)); } catch (Exception e) { return null; }
     }
 }
+
 

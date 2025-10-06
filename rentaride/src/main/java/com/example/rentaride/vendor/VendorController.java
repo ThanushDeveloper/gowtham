@@ -134,36 +134,38 @@ public class VendorController {
 
     @PutMapping("/vendorEditVehicles/{id}")
     public ResponseEntity<?> vendorEditVehicles(@PathVariable Long id, @RequestBody Map<String, Object> body) {
-        return vehicleRepository.findById(id).map(v -> {
-            Map<String, Object> fd = (Map<String, Object>) body.get("formData");
-            if (fd == null) return ResponseEntity.badRequest().body(err("invalid body"));
-            putIf(fd, "registeration_number", s -> v.setRegisterationNumber(s));
-            putIf(fd, "company", v::setCompany);
-            putIf(fd, "name", v::setName);
-            putIf(fd, "model", v::setModel);
-            putIf(fd, "title", v::setTitle);
-            putIf(fd, "base_package", s -> v.setBasePackage(s));
-            putIf(fd, "price", o -> v.setPrice(Integer.valueOf(o)));
-            putIf(fd, "year_made", o -> v.setYearMade(Integer.valueOf(o)));
-            putIf(fd, "fuelType", v::setFuelType);
-            putIf(fd, "Seats", o -> v.setSeats(Integer.valueOf(o)));
-            putIf(fd, "transmitionType", v::setTransmition);
-            putIf(fd, "vehicleLocation", v::setLocation);
-            putIf(fd, "vehicleDistrict", v::setDistrict);
-            putIf(fd, "carType", v::setCarType);
-            putIf(fd, "description", v::setDescription);
-            vehicleRepository.save(v);
-            return ResponseEntity.ok(Map.of("ok", true));
-        }).orElse(ResponseEntity.status(404).body(err("vehicle not found")));
+        var opt = vehicleRepository.findById(id);
+        if (opt.isEmpty()) return ResponseEntity.status(404).body(err("vehicle not found"));
+        var v = opt.get();
+        Map<String, Object> fd = (Map<String, Object>) body.get("formData");
+        if (fd == null) return ResponseEntity.badRequest().body(err("invalid body"));
+        setIfPresentStr(fd, "registeration_number", v::setRegisterationNumber);
+        setIfPresentStr(fd, "company", v::setCompany);
+        setIfPresentStr(fd, "name", v::setName);
+        setIfPresentStr(fd, "model", v::setModel);
+        setIfPresentStr(fd, "title", v::setTitle);
+        setIfPresentStr(fd, "base_package", v::setBasePackage);
+        setIfPresentInt(fd, "price", v::setPrice);
+        setIfPresentInt(fd, "year_made", v::setYearMade);
+        setIfPresentStr(fd, "fuelType", v::setFuelType);
+        setIfPresentInt(fd, "Seats", v::setSeats);
+        setIfPresentStr(fd, "transmitionType", v::setTransmition);
+        setIfPresentStr(fd, "vehicleLocation", v::setLocation);
+        setIfPresentStr(fd, "vehicleDistrict", v::setDistrict);
+        setIfPresentStr(fd, "carType", v::setCarType);
+        setIfPresentStr(fd, "description", v::setDescription);
+        vehicleRepository.save(v);
+        return ResponseEntity.ok(Map.of("ok", true));
     }
 
     @DeleteMapping("/vendorDeleteVehicles/{id}")
     public ResponseEntity<?> vendorDeleteVehicles(@PathVariable Long id) {
-        return vehicleRepository.findById(id).map(v -> {
-            v.setIsDeleted("true");
-            vehicleRepository.save(v);
-            return ResponseEntity.ok(Map.of("ok", true));
-        }).orElse(ResponseEntity.status(404).body(err("vehicle not found")));
+        var opt = vehicleRepository.findById(id);
+        if (opt.isEmpty()) return ResponseEntity.status(404).body(err("vehicle not found"));
+        var v = opt.get();
+        v.setIsDeleted("true");
+        vehicleRepository.save(v);
+        return ResponseEntity.ok(Map.of("ok", true));
     }
 
     private List<String> saveFiles(MultipartFile[] files) throws IOException {
@@ -192,12 +194,13 @@ public class VendorController {
         return m;
     }
 
-    private void putIf(Map<String, Object> fd, String key, java.util.function.Consumer<String> setter) {
+    private void setIfPresentStr(Map<String, Object> fd, String key, java.util.function.Consumer<String> setter) {
         if (fd.containsKey(key) && fd.get(key) != null) setter.accept(fd.get(key).toString());
     }
 
-    private void putIf(Map<String, Object> fd, String key, java.util.function.Consumer<Integer> setterInt) {
+    private void setIfPresentInt(Map<String, Object> fd, String key, java.util.function.Consumer<Integer> setterInt) {
         if (fd.containsKey(key) && fd.get(key) != null) setterInt.accept(Integer.valueOf(fd.get(key).toString()));
     }
 }
+
 

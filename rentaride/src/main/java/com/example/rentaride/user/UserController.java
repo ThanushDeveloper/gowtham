@@ -36,9 +36,9 @@ public class UserController {
         Long id = null;
         try { id = Long.valueOf(String.valueOf(body.get("id"))); } catch (Exception ignored) {}
         if (id == null) return ResponseEntity.badRequest().body(err("invalid id"));
-        return vehicleRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(404).body(err("vehicle not found")));
+        var opt = vehicleRepository.findById(id);
+        if (opt.isEmpty()) return ResponseEntity.status(404).body(err("vehicle not found"));
+        return ResponseEntity.ok(opt.get());
     }
 
     @PostMapping("/filterVehicles")
@@ -150,15 +150,16 @@ public class UserController {
 
     @PostMapping("/editUserProfile/{id}")
     public ResponseEntity<?> editUserProfile(@PathVariable Long id, @RequestBody Map<String, Object> body) {
-        return userRepository.findById(id).map(u -> {
-            Map<String, Object> fd = (Map<String, Object>) body.get("formData");
-            if (fd.get("username") != null) u.setUsername(fd.get("username").toString());
-            if (fd.get("email") != null) u.setEmail(fd.get("email").toString());
-            if (fd.get("phoneNumber") != null) u.setPhoneNumber(fd.get("phoneNumber").toString());
-            if (fd.get("adress") != null) u.setAdress(fd.get("adress").toString());
-            userRepository.save(u);
-            return ResponseEntity.ok(Map.of("ok", true));
-        }).orElse(ResponseEntity.status(404).body(err("user not found")));
+        var opt = userRepository.findById(id);
+        if (opt.isEmpty()) return ResponseEntity.status(404).body(err("user not found"));
+        var u = opt.get();
+        Map<String, Object> fd = (Map<String, Object>) body.get("formData");
+        if (fd.get("username") != null) u.setUsername(fd.get("username").toString());
+        if (fd.get("email") != null) u.setEmail(fd.get("email").toString());
+        if (fd.get("phoneNumber") != null) u.setPhoneNumber(fd.get("phoneNumber").toString());
+        if (fd.get("adress") != null) u.setAdress(fd.get("adress").toString());
+        userRepository.save(u);
+        return ResponseEntity.ok(Map.of("ok", true));
     }
 
     @DeleteMapping("/delete/{id}")
